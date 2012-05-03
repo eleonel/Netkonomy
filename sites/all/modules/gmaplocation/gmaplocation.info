@@ -1,0 +1,11 @@
+; $Id$ 
+name = Google Maps location
+description = Display one geographical location via Google Maps.
+package = Location
+core = 6.x
+; Information added by drupal.org packaging script on 2010-09-19
+version = "6.x-2.0"
+core = "6.x"
+project = "gmaplocation"
+datestamp = "1284888062"
+

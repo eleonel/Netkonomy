@@ -1,0 +1,132 @@
+# $Id: nl.po,v 1.1.2.1 2008/06/30 11:50:32 bmihelac Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  gmaplocation.module: n/a
+#  gmaplocation.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-06-11 15:45+0200\n"
+"PO-Revision-Date: 2008-06-27 14:03+0100\n"
+"Last-Translator: Litrik De Roy <litrik@norio.be>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gmaplocation.module:9
+msgid "<p>The gmaplocation module allow displaying of your geographic location via Google Maps.</p>"
+msgstr "<p>De gmaplocation module toont een geografische locatie via Google Maps.</p>"
+
+#: gmaplocation.module:19
+#: gmaplocation.info:0
+msgid "Google Maps location"
+msgstr "Google Maps locatie"
+
+#: gmaplocation.module:20
+msgid "Configure Google Maps location."
+msgstr "Google Maps locatie instellen"
+
+#: gmaplocation.module:26
+msgid "Our Location"
+msgstr "Onze Locatie"
+
+#: gmaplocation.module:43
+msgid "Your location"
+msgstr "Uw locatie"
+
+#: gmaplocation.module:46
+msgid "Description"
+msgstr "Beschrijving"
+
+#: gmaplocation.module:48
+msgid "The description that would be shown when user click on marker. If you leave this field blank, address would be used."
+msgstr "De beschrijving die getoond wordt wanneer de gebruiker op de markering klikt. Indien dit veld leeg blijft wordt het adres getoond."
+
+#: gmaplocation.module:53
+msgid "Address of your location"
+msgstr "Adres van uw locatie"
+
+#: gmaplocation.module:58
+msgid "Map type"
+msgstr "Soort kaart"
+
+#: gmaplocation.module:65;99
+msgid "API key"
+msgstr "API sleutel"
+
+#: gmaplocation.module:67;101
+msgid "Google Maps key for your domain."
+msgstr "Google Maps sleutel voor uw domein."
+
+#: gmaplocation.module:68;102
+msgid "Obtain key on !url"
+msgstr "Vraag een sleutel op !url"
+
+#: gmaplocation.module:72
+msgid "0 - minimum zoom level, whole world"
+msgstr "0 - minimum zoom niveau, volledige aardbol"
+
+#: gmaplocation.module:74
+msgid "17 - maximum zoom level"
+msgstr "17 - maximum zoom niveau"
+
+#: gmaplocation.module:76
+msgid "Map zoom level"
+msgstr "Zoom niveau van kaart"
+
+#: gmaplocation.module:82
+msgid "Geographical coordinate"
+msgstr "Geografische coordinaat"
+
+#: gmaplocation.module:85
+msgid "Geographical coordinate for your object. GMapLocation module will try to obtain this information from Google servers using Address field. You will be able to set this with dragging mark on the map. Leave blank if not sure."
+msgstr "Geografische coördinaat van uw locatie. De GMapLocation module module zla proberen deze informatie te bekomen van de Google servers gebaseerd op het Adres veld. Dit veld kan ook ingesteld worden door de marering te verslepen op de kaart. Laat dit veld eventueel leeg."
+
+#: gmaplocation.module:87;91
+msgid "Geographical coordinate latitude"
+msgstr ""
+
+#: gmaplocation.module:96
+msgid "Google Maps API keys"
+msgstr "Google Maps API keys sleutels"
+
+#: gmaplocation.module:147
+msgid "Location"
+msgstr "Locatie"
+
+#: gmaplocation.module:189
+msgid "Click and drag marker to fine tune position of your location."
+msgstr "Versleep de markering om de positie van uw locatie te verfijnen."
+
+#: gmaplocation.module:205
+msgid "Save new location and zoom level"
+msgstr "Nieuwe locatie en zoom niveau bewaren"
+
+#: gmaplocation.module:226
+msgid "Google Map static image block"
+msgstr "Google Map statisch afbeeldingsblok"
+
+#: gmaplocation.module:254
+msgid "Our location"
+msgstr "Onze locatie"
+
+#: gmaplocation.module:128
+msgid "edit gmaplocation"
+msgstr ""
+
+#: gmaplocation.module:0
+msgid "gmaplocation"
+msgstr ""
+
+#: gmaplocation.info:0
+msgid "Displaying of your geographic location via Google Maps"
+msgstr "Tonen van uw geografische locatie via Google Maps"
+
+#: gmaplocation.info:0
+msgid "Other"
+msgstr "Diverse"
+

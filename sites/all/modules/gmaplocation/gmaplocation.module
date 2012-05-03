@@ -1,0 +1,377 @@
+<?php
+
+/**
+ * Implementation of hook_help
+ */  
+function gmaplocation_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#gmaplocation':
+      $output = '<p>' . t('The Google Maps Location module displays a map of your geographic location with Google Maps.') . ' ' . 
+        l(t('The page for the map'), 'gmaplocation') . ' ' . t('is automatically generated.') . ' ' . 
+        t('A block is also created that displays a thumbnail of the map, linking to the map page.') . ' ' . 
+        t('This can be assigned to a page region on the') . ' ' . l(t('block administration page'), 'admin/build/block') . '.</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function gmaplocation_menu() {
+  $items = array();
+  $items['admin/settings/gmaplocation'] = array(
+    'title' => 'Google Maps location',
+    'description' => 'Configure Google Maps location.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gmaplocation_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer gmaplocation'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['gmaplocation'] = array('title' => 'Our Location',
+    'access callback' => TRUE,
+    'page callback' => 'gmaplocation_page',
+    'type' => MENU_SUGGESTED_ITEM,
+  );
+  $items['gmaplocation/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10
+  );
+  $items['gmaplocation/edit'] = array(
+    'title' => 'Edit',
+    'description' => 'Configure Google Maps location.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gmaplocation_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer gmaplocation'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Callback for admin settings page
+ */
+function gmaplocation_admin_settings() {
+  drupal_add_js(drupal_get_path('module', 'gmaplocation') . '/gmaplocation_admin.js');
+
+  $form['info'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Location information'),
+    '#collapsible' => FALSE,
+    );
+  $form['info']['gmaplocation_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => variable_get('gmaplocation_title', t('Our Location')),
+    '#description' => t("The title of the automatically generated "). l(t('map page'), 'gmaplocation') . '.',
+  );
+  $form['info']['gmaplocation_address'] = array('#type' => 'textfield',
+    '#required' => TRUE,
+    '#title' => t('Address of your location'),
+    '#default_value' => variable_get('gmaplocation_address', ''),
+    '#description' => t('Enter your address separated by commas. This will be sent to Google for geocoding to determine the geographical coordinates of your location. Include any suitable from: # Street, Suburb, City, Region/State, Postcode/Zip, Country.'),
+    );
+  $form['info']['gmaplocation_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Map type'),
+    '#default_value' => variable_get('gmaplocation_type', 'G_NORMAL_MAP'),
+    '#description' => NULL,
+    '#options' => array(
+      'G_NORMAL_MAP' => 'the default view',
+      'G_SATELLITE_MAP' => 'showing Google Earth satellite images',
+      'G_HYBRID_MAP' => 'showing a mixture of normal and satellite views'),
+    );
+  $zoom_levels = array('0' => t('0 - minimum zoom level, whole world'));
+  for ($i = 1; $i<17; $i++) $zoom_levels["$i"] = "$i";
+  $zoom_levels['17'] = t('17 - maximum zoom level');
+  $form['info']['gmaplocation_zoom'] = array('#type' => 'select',
+    '#title' => t('Map zoom level'),
+    '#default_value' => variable_get('gmaplocation_zoom', '10'),
+    '#description' => NULL,
+    '#options' => $zoom_levels,
+    );
+  $form['info']['gmaplocation_width'] = array('#type' => 'textfield',
+    '#title' => t('Map Width'),
+    '#default_value' => variable_get('gmaplocation_width', '300'),
+    '#field_suffix' => 'px',
+    '#description' => NULL,
+    '#size' => 10,
+    );
+  $form['info']['gmaplocation_height'] = array('#type' => 'textfield',
+    '#title' => t('Map Height'),
+    '#default_value' => variable_get('gmaplocation_height', '500'),
+    '#field_suffix' => 'px',
+    '#description' => NULL,
+    '#size' => 10,
+    );
+  $form['info']['latlng'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Geographical coordinates'), 
+    '#collapsible' => FALSE,
+    '#description' => t('Geographical coordinates for your location. GMapLocation will try to obtain this information from Google using the address above. You are also able to fine-tune this by dragging the marker on the' . ' ' . l(t('map page'), 'gmaplocation') . '. Under normal circumstances you would not set these coordinates manually.'));
+  $form['info']['latlng']['gmaplocation_lat'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Latitude'),
+    '#default_value' => variable_get('gmaplocation_lat', '-46.0868686'),
+    );
+  $form['info']['latlng']['gmaplocation_lng'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Longitude'),
+    '#default_value' => variable_get('gmaplocation_lng', '166.6822074'),
+    );
+  $form['info']['gmaplocation_info'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Marker Information'),
+    '#default_value' => variable_get('gmaplocation_info', ''),
+    '#description' => t('The description that will be shown when a user clicks on the marker. If this field is empty, the address will be used.'),
+    );
+  $form['info']['gmaplocation_body_filter']['gmaplocation_body'] = array('#type' => 'textarea',
+    '#required' => FALSE,
+    '#title' => t('Additional information (displayed above map)'),
+    '#default_value' => variable_get('gmaplocation_body', ''),
+    '#description' => t('Any additional information that you would like to include above the map.')
+  );
+  $form['info']['gmaplocation_body_filter']['format'] = filter_form(FILTER_FORMAT_DEFAULT, null, $parents=array('info', 'gmaplocation_body_filter', 'format'));
+  $form['info']['gmaplocation_footer_filter']['gmaplocation_footer'] = array('#type' => 'textarea',
+    '#required' => FALSE,
+    '#title' => t('Additional information (displayed below map)'),
+    '#default_value' => variable_get('gmaplocation_footer', ''),
+    '#description' => t('Any additional information you would like to include below the map.')
+  );
+  $form['info']['gmaplocation_footer_filter']['format'] = filter_form(FILTER_FORMAT_DEFAULT, null, $parents=array('info', 'gmaplocation_footer_filter', 'format'));
+  $form['keys'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Google Maps API key'), 
+    '#collapsible' => TRUE,
+    '#collapsed' => variable_get('gmaplocation_key', FALSE));
+  $form['keys']['gmaplocation_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('API key'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('gmaplocation_key', ''),
+    '#description' => t('Google Maps key for your domain.') . " " .  
+      t('Obtain key on !url', array('!url' => l('http://code.google.com/apis/maps/signup.html', 'http://code.google.com/apis/maps/signup.html')))
+    );
+  $form['#validate'][] = 'gmaplocation_admin_settings_validate';
+
+  return system_settings_form($form);
+}
+
+function gmaplocation_admin_settings_validate($form, &$form_state) {
+  if ($form_state['values']['gmaplocation_address']) {
+    $latlng = gmaplocation_geocode_for_address_recursive($form_state['values']['gmaplocation_address']);
+    if ($latlng != FALSE) {
+      list($lat, $lng) = $latlng;
+      $form_state['values']['gmaplocation_lat'] = $lat;
+      $form_state['values']['gmaplocation_lng'] = $lng;
+    } else {
+      switch ($form_state['values']['gmaplocation_lat']) {
+        // If Geocoding fails and there are no previous coordinates, set to the default: Round Island in New Zealand's Fiordland National Park.
+        case '':
+          $form_state['values']['gmaplocation_lat'] = '-46.0868686';
+          $form_state['values']['gmaplocation_lng'] = '166.6822074';
+          drupal_set_message('Unable to Geocode address provided. As no previous coordinates were recorded, default values have been inserted. Try slightly modifying the address and resubmit, e.g. giving more or less detail, such as leaving out the suburb or state.', 'warning');
+          break;
+        // If Geocoding fails and there are previous coordinates, set to those coordinates.
+        default:
+          $form_state['values']['gmaplocation_lat'] = variable_get('gmaplocation_lat', '-46.0868686');
+          $form_state['values']['gmaplocation_lng'] = variable_get('gmaplocation_lng', '166.6822074');
+          drupal_set_message('Unable to Geocode address provided&mdash;previous coordinates will be used. Try slightly modifying the address and resubmit, e.g. giving more detail, or leaving out the suburb or state.', 'warning');
+          break;
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function gmaplocation_perm() {
+  return array('administer gmaplocation');
+}
+
+/**
+ * Menu callback; generate an page with Google Maps.
+ */
+function gmaplocation_page() {
+  $gmaplocation_title = variable_get('gmaplocation_title', t('Our Location'));
+  $gmaplocation_body = variable_get('gmaplocation_body', '');
+  $gmaplocation_footer = variable_get('gmaplocation_footer', '');
+  $path = drupal_get_path('module', 'gmaplocation');
+  $gmap_key = variable_get('gmaplocation_key', NULL);
+  drupal_set_html_head('<script src="http://maps.google.com/maps?file=api&amp;hl=en&amp;v=2&amp;key=' . $gmap_key . '" type="text/javascript"></script>');
+  drupal_add_js($path . '/gmaplocation.js');
+  $gmaplocation_settings = array(
+    'address' => variable_get('gmaplocation_address', 'Fiordland, New Zealand'),
+    'info' => variable_get('gmaplocation_info', 'Fiordland, New Zealand'),
+    'lat' => variable_get('gmaplocation_lat', '-46.0868686'),
+    'lng' => variable_get('gmaplocation_lng', '166.6822074'),
+    'zoom' => variable_get('gmaplocation_zoom', 10),
+    'type' => variable_get('gmaplocation_type', 'G_NORMAL_MAP'),
+    'admin' => user_access('administer gmaplocation'),
+  );
+  if (!$gmaplocation_settings['info']) $gmaplocation_settings['info'] = $gmaplocation_settings['address'];
+  drupal_add_js(array('gmaplocation' => $gmaplocation_settings), 'setting');
+  $output = '<div id="gmaplocation_body">' . $gmaplocation_body . '</div>';
+  $output .= theme('gmaplocation_map');
+  $output .= '<div id="gmaplocation_footer">' . $gmaplocation_footer . '</div>';
+  if (user_access('administer gmaplocation')) $output .= drupal_get_form('gmaplocation_in_place_edit_form');
+  drupal_set_title($gmaplocation_title);
+  return $output;
+}
+
+
+/**
+ * Returns latitude and longitude for $address or NULL if it cannot be found.
+ * @returns FALSE if address not found
+ */
+function gmaplocation_geocode_for_address($address) {
+  $gmap_key = variable_get('gmaplocation_key', NULL);
+  if (!$gmap_key) return (FALSE);
+  $address = urlencode($address);
+  $url = "http://maps.google.com/maps/geo?q=$address&key=$gmap_key&output=csv";
+  $options = array(
+    'http' => array(
+      'max_redirects' => 10,        
+      'timeout'       => 120,       
+    )
+  );
+  $context = stream_context_create($options);  
+  $page = @file_get_contents( $url, false, $context );
+  if (!$page) return(FALSE);
+  $matches = explode(',', $page);
+  if (!($matches[0] == '200')) return(FALSE);
+  return (array($matches[2], $matches[3]));
+}
+
+/**
+ * Try to get lat and lng information from address removing parts of address if not found. 
+ */
+function gmaplocation_geocode_for_address_recursive($address) {
+  while (TRUE) {
+    $latlng = gmaplocation_geocode_for_address($address);
+    if ($latlng) return($latlng);
+    if (strpos($address, ',') === FALSE) return (FALSE);
+    $address = preg_replace('/[^,]+,/', '', $address, 1);
+  }
+  return (FALSE);
+}
+
+function gmaplocation_in_place_edit_form() {
+  $form['#submit'][] = 'system_settings_form_submit';
+  $form['description'] = array(
+    '#prefix' => '<p>',
+    '#value' => t('Click and drag marker to fine tune position of your location.'),
+    '#suffix' => '</p>',
+    );
+  $form['gmaplocation_lat'] = array('#type' => 'textfield',
+    '#default_value' => variable_get('gmaplocation_lat', ''),
+    '#disabled' => TRUE,
+    );
+  $form['gmaplocation_lng'] = array('#type' => 'textfield',
+    '#default_value' => variable_get('gmaplocation_lng', ''),
+    '#disabled' => TRUE,
+    );
+  $form['gmaplocation_zoom'] = array('#type' => 'textfield',
+    '#default_value' => variable_get('gmaplocation_zoom', ''),
+    '#disabled' => TRUE,
+    );
+  $form['submit'] = array('#type' => 'submit',
+    '#value' => t('Save new location and zoom level'),
+  );
+  return($form);
+}
+
+/**
+* Implementation of hook_simpletest().
+*/
+function gmaplocation_simpletest() {
+  // Scan through mymodule/tests directory for any .test files to tell SimpleTest module.
+  $tests = file_scan_directory(drupal_get_path('module', 'gmaplocation') .'/tests', '\.test');
+  return array_keys($tests);
+}
+
+/**
+ * Implementation of hook_block().
+ *
+ * Generates block for the location as a static image linked to the full gmaplocation page.
+ */
+function gmaplocation_block($op = 'list', $delta = 0, $edit = array()) {
+  // The $op parameter determines what piece of information is being requested.
+  switch ($op) {
+    case 'list':
+      $blocks['image']['info'] = t('Google Map static image block');
+      return $blocks;
+    case 'configure': 
+      $form = array();
+      $form['info']['gmaplocation_texttop_filter']['gmaplocation_texttop'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Additional text to show above the image'),
+        '#default_value' => variable_get('gmaplocation_block_text_top', '')
+      );
+      $form['info']['gmaplocation_texttop_filter']['format'] = filter_form(FILTER_FORMAT_DEFAULT, null, $parents=array('info', 'gmaplocation_texttop_filter','format'));
+      return $form; 
+      break;
+    case 'save':
+      variable_set('gmaplocation_block_text_top', $edit['gmaplocation_texttop']);
+      break;
+    case 'view':
+      switch ($delta) {
+        case 'image':
+          $texttop = variable_get('gmaplocation_block_text_top', '');
+          $texttop = ($texttop == true) ? '<div id="gmaplocation-block-text-top">'.variable_get('gmaplocation_block_top_text', '').'</div>' : '';
+          $block = gmaplocation_block_image();
+          $block['content'] = $texttop.$block['content'];
+          break;
+    }
+    return $block;
+  }
+}
+
+function gmaplocation_static_image_url($w = 200, $h = 150) {
+  $image_url = 'http://maps.google.com/staticmap?zoom=' . variable_get('gmaplocation_zoom', 5);
+  $image_url .= "&amp;size={$w}x{$h}";
+  $image_url .= '&amp;markers=' . variable_get('gmaplocation_lat', 0) . ','. variable_get('gmaplocation_lng', 0);
+  $image_url .= '&amp;key=' . variable_get('gmaplocation_key', NULL);
+  return($image_url);
+}
+
+function gmaplocation_block_image() {
+  $block = array();
+  $block['subject'] = variable_get('gmaplocation_title', t('Our Location'));
+  $block['content'] = theme('gmaplocation_block_image_link');
+  return($block);  
+}
+
+/**
+ * Format static image for display in the block.
+ *
+ * @ingroup themeable
+ */
+function theme_gmaplocation_block_image_link() {
+  return(l('<img src="' . gmaplocation_static_image_url(160, 120) . '" alt="Location map" />', 'gmaplocation', array('html' => TRUE)));
+}
+
+/**
+ * Format div for display Google Maps in it.
+ *
+ * @ingroup themeable
+ */
+function theme_gmaplocation_map() {
+  $width = variable_get('gmaplocation_width', '500') . 'px';
+  $height = variable_get('gmaplocation_height', '300') . 'px';
+  return ('<div id="gmaplocation_map" style="width: ' . $width . '; height: ' . $height . '"></div>');
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function gmaplocation_theme() {
+  return array(
+    'gmaplocation_block_image_link' => array(),
+    'gmaplocation_map' => array(),
+  );
+}
+ 

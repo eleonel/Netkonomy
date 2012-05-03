@@ -1,0 +1,32 @@
+<?php
+
+class gmaplocationTest extends DrupalTestCase {
+  
+  function get_info() {
+    return array(
+      'name'  => 'GMapLocation',
+      'desc'  => t('GMapLocation unit tests.'),
+      'group' => 'GMapLocation',
+    );
+  }
+  
+  function test_gmaplocation_geocode_for_address() {
+    $result = gmaplocation_geocode_for_address("1600 Amphitheatre Parkway, Mountain View, CA");
+    $expected = array("37.421972", "-122.084143");
+    $this->assertEqual($expected, $result);
+  }
+  
+  function test_gmaplocation_geocode_for_address_not_found() {
+    $this->assertEqual(FALSE, gmaplocation_geocode_for_address("abcdefgh123"));
+  }
+  
+  function test_gmaplocation_geocode_for_address_recursive()  {
+    $result = gmaplocation_geocode_for_address_recursive("NonExistentAddress 123, NonExistingCity, Croatia");
+    $expected = array("44.466244", "16.461248");
+    $this->assertEqual($expected, $result);
+
+    $result = gmaplocation_geocode_for_address_recursive("NonExistentAddress 123, Pula, Croatia");
+    $expected = array("44.869652", "13.841147");
+    $this->assertEqual($expected, $result);
+  }
+}
