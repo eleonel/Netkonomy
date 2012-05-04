@@ -1,0 +1,37 @@
+<?php
+// $Id$ 
+/**
+ * Rename 5.x-1.0 permission "admin gmaplocation" and 6.x-1.0 permission
+ * "edit gmaplocation" to "administer gmaplocation".
+ */
+function gmaplocation_update_200() {
+  $ret = array();
+  
+  // Fix role permissions to account for the changed names. Setup the replace 
+  // array which holds strings both the old and new permissions.
+  $replace = array(
+    'admin gmaplocation' => 'administer gmaplocation',
+    'edit gmaplocation' => 'administer gmaplocation'
+  );
+
+  // Loop over all the changes, performing necessary updates.
+  foreach ($replace as $old_permission => $new_permission) {
+    $ret[] = update_sql("UPDATE permission SET perm = REPLACE(perm, '$old_permission', '$new_permission')");
+    }
+  return $ret;
+}
+
+function gmaplocation_uninstall() {
+  variable_del('gmaplocation_info');
+  variable_del('gmaplocation_lng');
+  variable_del('gmaplocation_lat');
+  variable_del('gmaplocation_height');
+  variable_del('gmaplocation_width');
+  variable_del('gmaplocation_zoom');
+  variable_del('gmaplocation_address');
+  variable_del('gmaplocation_type');
+  variable_del('gmaplocation_title');
+  variable_del('gmaplocation_body');
+  variable_del('gmaplocation_footer');
+  variable_del('gmaplocation_key');
+}

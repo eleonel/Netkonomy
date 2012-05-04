@@ -1,0 +1,11 @@
+GMapLocation module
+
+**Installation:
+1. Unpack the GMapLocation folder and contents in the modules directory of your Drupal installation (usually /sites/all/modules).
+2. Enable the GMapLocation module in the administration tools (http://yoursite.com/admin/build/modules).
+3. If you're not using Drupal's default administrative account, make sure your user account has the "administer gmaplocation" permission (http://yoursite.com/admin/user/permissions).
+4. Set your location in the gmaplocation settings page (http://www.yoursite.com/admin/settings/gmaplocation).
+5. If you wish to use the block provided that links to your GMapLocation page, navigate to the Block administration section and enable the block, assigning it to the desired region (http://www.yoursite.com/admin/build/block).
+
+Visit http://www.yoursite.com/gmaplocation to see map and fine tune position.
+Add the block "Google Map static image block" to some region of the website if you wish.
